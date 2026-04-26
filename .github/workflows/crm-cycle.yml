@@ -1,0 +1,58 @@
+name: CRM Automation Cycle
+
+on:
+  schedule:
+    - cron: '0 9 * * 1-5'   # Every weekday at 9am UTC (2:30pm IST)
+  workflow_dispatch:          # Manual trigger button in GitHub UI
+
+jobs:
+  crm-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        working-directory: CRM_Automation
+
+      - name: Run CRM cycle (Zoho)
+        run: python tools/run_crm_cycle.py --source zoho
+        working-directory: CRM_Automation
+        env:
+          EURI_API_KEY: ${{ secrets.EURI_API_KEY }}
+          ZOHO_REFRESH_TOKEN: ${{ secrets.ZOHO_REFRESH_TOKEN }}
+          ZOHO_CLIENT_ID: ${{ secrets.ZOHO_CLIENT_ID }}
+          ZOHO_CLIENT_SECRET: ${{ secrets.ZOHO_CLIENT_SECRET }}
+          ZOHO_ACCOUNT_URL: ${{ secrets.ZOHO_ACCOUNT_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DEFAULT_OWNER_EMAIL: ${{ secrets.DEFAULT_OWNER_EMAIL }}
+          SCORE_THRESHOLD_HOT: 90
+          SCORE_THRESHOLD_WARM: 60
+
+      - name: Upload run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-run-logs-${{ github.run_id }}
+          path: CRM_Automation/runs/
+          retention-days: 30
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d '{"text": "❌ CRM Automation failed — check GitHub Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
