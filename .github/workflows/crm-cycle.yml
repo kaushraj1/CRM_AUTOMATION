@@ -48,6 +48,15 @@ jobs:
           path: CRM_Automation/runs/
           retention-days: 30
 
+      - name: Notify Slack on success
+        if: success()
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d '{"text": "✅ CRM Cycle complete — Leads scored & updated in Zoho. View logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Notify Slack on failure
         if: failure()
         run: |
