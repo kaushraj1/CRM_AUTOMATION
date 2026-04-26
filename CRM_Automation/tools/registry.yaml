@@ -1,0 +1,119 @@
+# Tool Registry — schemas for all tools in this project.
+# The agent reads this to know what tools exist and how to call them.
+
+tools:
+  fetch_leads:
+    description: "Fetch new/changed leads from a CRM since the last successful run"
+    file: tools/fetch_leads.py
+    inputs:
+      source: {type: string, required: true, choices: [airtable, hubspot, zoho, mock]}
+      since-state: {type: string, default: ".tmp/last_run.json"}
+      since: {type: string, default: null, description: "ISO date override (YYYY-MM-DD)"}
+      max-leads: {type: int, default: 50}
+      output: {type: string, default: ".tmp/new_leads.json"}
+    outputs:
+      file: ".tmp/new_leads.json"
+      format: "JSON array of normalized lead dicts"
+    cost: "$0 (CRM free tiers)"
+    requires_per_source:
+      airtable: [AIRTABLE_API_KEY, AIRTABLE_BASE_ID]
+      hubspot: [HUBSPOT_API_KEY]
+      zoho: [ZOHO_REFRESH_TOKEN, ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET]
+      mock: []
+
+  score_lead:
+    description: "Score leads 0-100 with band (hot/warm/cold) — LLM via Euri or heuristic fallback"
+    file: tools/score_lead.py
+    inputs:
+      input: {type: string, default: ".tmp/new_leads.json"}
+      output: {type: string, default: ".tmp/scored_leads.json"}
+      no-llm: {type: bool, default: false}
+    outputs:
+      file: ".tmp/scored_leads.json"
+      format: "JSON array — each lead gains score, band, signals, reasoning, method"
+    cost: "~$0.001 per lead (Euri free) or $0 (heuristic)"
+    requires: [EURI_API_KEY]
+
+  route_lead:
+    description: "Assign owner (round-robin) + track (hot/warm/cold) per scored lead"
+    file: tools/route_lead.py
+    inputs:
+      input: {type: string, default: ".tmp/scored_leads.json"}
+      output: {type: string, default: ".tmp/routed_leads.json"}
+    outputs:
+      file: ".tmp/routed_leads.json"
+      format: "JSON array — each lead gains owner_email, track, next_touch_at, next_stage"
+    cost: "$0"
+    requires: []
+    config: [config/owners.yaml, config/tracks.yaml]
+
+  update_crm:
+    description: "Write score/owner/track/stage back to CRM, optionally create owner tasks"
+    file: tools/update_crm.py
+    inputs:
+      source: {type: string, required: true, choices: [airtable, hubspot, zoho, mock]}
+      input: {type: string, default: ".tmp/routed_leads.json"}
+      output: {type: string, default: ".tmp/update_receipts.json"}
+      dry-run: {type: bool, default: false}
+      create-tasks: {type: bool, default: false}
+    outputs:
+      file: ".tmp/update_receipts.json"
+      format: "JSON array of {id, update, task} receipts"
+    cost: "$0"
+
+  send_followup:
+    description: "Send first-touch (or scheduled) email per track via Resend"
+    file: tools/send_followup.py
+    inputs:
+      input: {type: string, default: ".tmp/routed_leads.json"}
+      output: {type: string, default: ".tmp/email_receipts.json"}
+      touch: {type: string, default: "first"}
+      dry-run: {type: bool, default: false}
+    outputs:
+      file: ".tmp/email_receipts.json"
+      format: "JSON array of send receipts"
+    cost: "$0 (Resend free 100/day)"
+    requires: [RESEND_API_KEY, EMAIL_FROM]
+
+  advance_stage:
+    description: "Move lead stages forward based on band + first-touch sent"
+    file: tools/advance_stage.py
+    inputs:
+      source: {type: string, required: true, choices: [airtable, hubspot, zoho, mock]}
+      input: {type: string, default: ".tmp/routed_leads.json"}
+      output: {type: string, default: ".tmp/stage_receipts.json"}
+      dry-run: {type: bool, default: false}
+    outputs:
+      file: ".tmp/stage_receipts.json"
+    cost: "$0"
+
+  weekly_report:
+    description: "Aggregate 7-day CRM stats → markdown + Slack"
+    file: tools/weekly_report.py
+    inputs:
+      source: {type: string, required: true, choices: [airtable, hubspot, zoho, mock]}
+      week: {type: int, default: null, description: "ISO week number"}
+      days: {type: int, default: 7}
+      no-llm: {type: bool, default: false}
+      post-slack: {type: bool, default: false}
+    outputs:
+      file: "runs/YYYY-WWW-crm-health.md"
+      format: "Markdown report"
+    cost: "~$0.005 (Euri narrative)"
+    requires: [SLACK_WEBHOOK_URL]
+    requires_optional: [EURI_API_KEY]
+
+  run_crm_cycle:
+    description: "Orchestrator — runs fetch→score→route→update→email→stage in one shot"
+    file: tools/run_crm_cycle.py
+    inputs:
+      source: {type: string, required: true, choices: [airtable, hubspot, zoho, mock]}
+      dry-run: {type: bool, default: false}
+      max-leads: {type: int, default: 50}
+      no-llm: {type: bool, default: false}
+      skip-tasks: {type: bool, default: false}
+      skip-emails: {type: bool, default: false}
+    outputs:
+      file: "runs/YYYY-MM-DD-HHMMSS-lead-lifecycle.md"
+      format: "Markdown run log"
+    cost: "≤ $0.05 per cycle (≤ 50 leads)"

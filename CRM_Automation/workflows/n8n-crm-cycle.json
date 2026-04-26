@@ -1,0 +1,86 @@
+{
+  "name": "CRM Automation Cycle",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule (Weekdays 9am)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/user/CRM_Automation && python tools/run_crm_cycle.py --source zoho 2>&1"
+      },
+      "id": "run-crm",
+      "name": "Run CRM Cycle",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.exitCode }}",
+              "operation": "equal",
+              "value2": "0"
+            }
+          ]
+        }
+      },
+      "id": "check-success",
+      "name": "Success?",
+      "type": "n8n-nodes-base.if",
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "webhookUri": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "text": "✅ CRM Automation ran successfully!\n{{ $node['Run CRM Cycle'].json.stdout }}"
+      },
+      "id": "slack-success",
+      "name": "Slack — Success",
+      "type": "n8n-nodes-base.slack",
+      "position": [960, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "webhookUri": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "text": "❌ CRM Automation FAILED!\nError:\n{{ $node['Run CRM Cycle'].json.stderr }}"
+      },
+      "id": "slack-failure",
+      "name": "Slack — Failure",
+      "type": "n8n-nodes-base.slack",
+      "position": [960, 400]
+    }
+  ],
+  "connections": {
+    "Schedule (Weekdays 9am)": {
+      "main": [[{ "node": "Run CRM Cycle", "type": "main", "index": 0 }]]
+    },
+    "Run CRM Cycle": {
+      "main": [[{ "node": "Success?", "type": "main", "index": 0 }]]
+    },
+    "Success?": {
+      "main": [
+        [{ "node": "Slack — Success", "type": "main", "index": 0 }],
+        [{ "node": "Slack — Failure", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

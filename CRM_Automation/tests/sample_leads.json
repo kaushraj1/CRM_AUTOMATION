@@ -1,0 +1,96 @@
+{
+  "leads": [
+    {
+      "id": "mock_001",
+      "name": "Priya Sharma",
+      "email": "priya.sharma@bigcorp.com",
+      "company": "BigCorp Industries",
+      "title": "VP of Engineering",
+      "lead_source": "demo_request",
+      "intent_signals": ["demo_request", "pricing_page", "contact_sales"],
+      "created_at": "2026-04-19T08:00:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "Asked for a demo via website. Mentioned 200-person eng team."}
+    },
+    {
+      "id": "mock_002",
+      "name": "John Patel",
+      "email": "john@startup.io",
+      "company": "Startup IO",
+      "title": "Founder & CEO",
+      "lead_source": "referral",
+      "intent_signals": ["pricing_page", "webinar"],
+      "created_at": "2026-04-19T09:15:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "Referred by an existing customer. Small team, 8 people."}
+    },
+    {
+      "id": "mock_003",
+      "name": "Anita Verma",
+      "email": "anita.verma@megaenterprise.com",
+      "company": "Mega Enterprise Ltd",
+      "title": "Director of Operations",
+      "lead_source": "organic",
+      "intent_signals": ["webinar"],
+      "created_at": "2026-04-18T14:30:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "Attended webinar. No follow-up actions yet."}
+    },
+    {
+      "id": "mock_004",
+      "name": "Random Person",
+      "email": "random@gmail.com",
+      "company": "",
+      "title": "Student",
+      "lead_source": "paid",
+      "intent_signals": [],
+      "created_at": "2026-04-17T20:00:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "Came via paid ad. Looks like a student."}
+    },
+    {
+      "id": "mock_005",
+      "name": "Lisa Chen",
+      "email": "lisa.chen@scaleupinc.com",
+      "company": "ScaleUp Inc",
+      "title": "Head of Sales",
+      "lead_source": "content",
+      "intent_signals": ["pricing_page", "contact_sales", "booked_meeting"],
+      "created_at": "2026-04-19T07:45:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "Read 3 blog posts, downloaded whitepaper, booked discovery call."}
+    },
+    {
+      "id": "mock_006",
+      "name": "",
+      "email": "noreply@example.com",
+      "company": "",
+      "title": "",
+      "lead_source": "cold",
+      "intent_signals": [],
+      "created_at": "2026-04-19T10:00:00Z",
+      "stage": "new",
+      "do_not_contact": true,
+      "raw": {"notes": "Unsubscribed lead — should score 0."}
+    },
+    {
+      "id": "mock_007",
+      "name": "Marcus Reeves",
+      "email": "marcus@globalcorp.com",
+      "company": "GlobalCorp",
+      "title": "Chief Technology Officer",
+      "lead_source": "referral",
+      "intent_signals": ["demo_request", "contact_sales", "pricing_page", "booked_meeting"],
+      "created_at": "2026-04-19T11:00:00Z",
+      "stage": "new",
+      "do_not_contact": false,
+      "raw": {"notes": "CTO referral from existing customer. Booked discovery call. Asked about enterprise pricing."}
+    }
+  ],
+  "tasks": []
+}

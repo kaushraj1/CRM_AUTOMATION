@@ -1,0 +1,35 @@
+# Stage name mapping per CRM backend.
+# Each CRM uses different stage vocabulary — we normalize via these keys.
+
+# Normalized stage keys (what score/route logic uses internally):
+#   new, contacted, nurture, qualified, disqualified
+
+airtable:
+  field_name: "Stage"
+  stages:
+    new: "New"
+    contacted: "Contacted"
+    nurture: "Nurture"
+    qualified: "Qualified"
+    disqualified: "Disqualified"
+
+hubspot:
+  # HubSpot uses "lifecyclestage" for Contacts and dealstage IDs for Deals.
+  # We target Contacts → lifecyclestage.
+  field_name: "lifecyclestage"
+  stages:
+    new: "lead"
+    contacted: "salesqualifiedlead"
+    nurture: "subscriber"
+    qualified: "opportunity"
+    disqualified: "other"
+
+zoho:
+  # Zoho Leads object uses "Lead_Status"
+  field_name: "Lead_Status"
+  stages:
+    new: "Not Contacted"
+    contacted: "Contacted"
+    nurture: "Pre-Qualified"
+    qualified: "Qualified"
+    disqualified: "Lost Lead"

@@ -1,0 +1,108 @@
+# Follow-up tracks — edit templates and cadences for your business.
+# {{placeholders}} get filled at send time. Required placeholders:
+#   {{name}}, {{company}}, {{owner_first_name}}, {{owner_email}}
+
+tracks:
+  first_call_24h:
+    band: hot
+    description: "High-intent enterprise. Call within 24h. Email sets context."
+    owner_task: "Call {{name}} at {{company}} within 24 hours"
+    task_due_in_hours: 24
+    touches:
+      - delay_hours: 0
+        subject: "Quick note — saw your interest in our platform"
+        body: |
+          Hi {{name}},
+
+          I'm {{owner_first_name}} — I'll be your point of contact at Dhruv.ai.
+          Saw your team at {{company}} has been exploring the platform.
+
+          I'll give you a quick call within 24 hours. If you'd rather pick a time,
+          my calendar is here: {{owner_calendar_url}}
+
+          Either way — what's the main problem you're looking to solve?
+
+          — {{owner_first_name}}
+      - delay_hours: 48
+        subject: "Following up — worth a 15-min chat?"
+        body: |
+          Hi {{name}}, circling back. Happy to keep this short — 15 minutes to
+          understand what {{company}} needs and share whether we're a fit.
+
+          {{owner_calendar_url}}
+
+          — {{owner_first_name}}
+
+  nurture_5_email:
+    band: warm
+    description: "Good fit but not urgent. 5-email sequence over 21 days."
+    owner_task: "Review {{name}}'s engagement after day 3"
+    task_due_in_hours: 72
+    touches:
+      - delay_hours: 0
+        subject: "Welcome, {{name}} — here's what's worked for teams like yours"
+        body: |
+          Hi {{name}},
+
+          Thanks for your interest. Teams at companies your size typically use our
+          platform to automate 3 workflows first — here's a 5-min read on where to start:
+          https://dhruv.ai/resources/first-workflows
+
+          I'll share more over the next few weeks. Reply anytime if something's unclear.
+
+          — {{owner_first_name}}
+      - delay_hours: 72
+        subject: "Case study: how [Similar Company] shipped faster"
+        body: |
+          Hi {{name}}, sharing a case study I thought {{company}} would find useful.
+          https://dhruv.ai/case-studies
+
+          Reply if you want the full playbook.
+
+          — {{owner_first_name}}
+      - delay_hours: 168
+        subject: "One common mistake to avoid"
+        body: |
+          Hi {{name}}, quick one. Most teams over-scope the first automation.
+          Here's the 1-week starter we recommend: https://dhruv.ai/starter-playbook
+
+          — {{owner_first_name}}
+      - delay_hours: 336
+        subject: "Still useful?"
+        body: |
+          Hi {{name}}, want to make sure these are landing. If not useful, reply "stop"
+          and I'll pause. If useful, reply "more" and I'll share our advanced patterns.
+
+          — {{owner_first_name}}
+      - delay_hours: 504
+        subject: "Final one — want a live walkthrough?"
+        body: |
+          Hi {{name}}, last in this series. If you'd like a 20-min walkthrough to see
+          how this maps to {{company}}, my calendar is here: {{owner_calendar_url}}
+
+          Either way — thanks for reading.
+
+          — {{owner_first_name}}
+
+  long_drip_monthly:
+    band: cold
+    description: "Low fit or stale. Monthly touchpoint, no human task."
+    owner_task: null
+    task_due_in_hours: null
+    touches:
+      - delay_hours: 0
+        subject: "The monthly AI automation digest"
+        body: |
+          Hi {{name}},
+
+          You signed up for our monthly AI automation digest. No pitches — just the
+          3 best things we read, built, or shipped this month.
+
+          — The Dhruv.ai team
+      - delay_hours: 720
+        subject: "This month in AI automation"
+        body: |
+          Hi {{name}}, here's what's new.
+          https://dhruv.ai/digest
+
+          — The Dhruv.ai team

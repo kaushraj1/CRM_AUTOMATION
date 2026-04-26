@@ -1,0 +1,25 @@
+# Owner pool for round-robin lead routing.
+# Swap for your team. Order matters — round-robin walks top-to-bottom.
+#
+# capacity_limit: max open leads an owner can hold before they're skipped
+# tracks: which tracks this owner can be assigned (hot/warm/cold/all)
+# timezone: used by send_followup to respect working hours
+
+capacity_limit: 50
+
+owners:
+  - name: "Sales Rep 1"
+    email: "rep1@example.com"
+    tracks: [hot, warm]
+    timezone: "Asia/Kolkata"
+  - name: "Sales Rep 2"
+    email: "rep2@example.com"
+    tracks: [hot, warm]
+    timezone: "Asia/Kolkata"
+  - name: "Nurture Bot"
+    email: "nurture@example.com"
+    tracks: [cold]
+    timezone: "UTC"
+
+# Fallback if no owner has capacity or all are filtered out
+fallback_owner_email: "nurture@example.com"
